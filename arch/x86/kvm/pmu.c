@@ -52,6 +52,7 @@ static void kvm_pmi_trigger_fn(struct irq_work *irq_work)
 	struct kvm_pmu *pmu = container_of(irq_work, struct kvm_pmu, irq_work);
 	struct kvm_vcpu *vcpu = pmu_to_vcpu(pmu);
 
+  printk(KERN_ALERT "without perf, can I be printed?");
 	kvm_pmu_deliver_pmi(vcpu);
 }
 
