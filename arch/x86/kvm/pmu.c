@@ -21,6 +21,8 @@
 #include "cpuid.h"
 #include "lapic.h"
 #include "pmu.h"
+#include "linux/module.h"
+#include "linux/init.h"
 
 /* NOTE:
  * - Each perf counter is defined as "struct kvm_pmc";
@@ -308,3 +310,16 @@ void kvm_pmu_destroy(struct kvm_vcpu *vcpu)
 {
 	kvm_pmu_reset(vcpu);
 }
+
+static int hello_init(void)
+{
+  printk(KERN_NOTICE "recompile pmu.c end\n");
+  return 0;
+}
+
+static void hello_exit(void)
+{
+  printk(KERN_NOTICE "recompile pmu.c start!\n");
+}
+module_init(hello_init);
+module_exit(hello_exit);
