@@ -53,6 +53,7 @@ static void reprogram_fixed_counters(struct kvm_pmu *pmu, u64 data)
 	}
 
 	pmu->fixed_ctr_ctrl = data;
+  printk(KERN_NOTICE "I am in pmu_intel.c");
 }
 
 /* function is called when global control register has been updated. */
@@ -65,6 +66,7 @@ static void global_ctrl_changed(struct kvm_pmu *pmu, u64 data)
 
 	for_each_set_bit(bit, (unsigned long *)&diff, X86_PMC_IDX_MAX)
 		reprogram_counter(pmu, bit);
+  printk(KERN_NOTICE "I am in pmu_intel.c");
 }
 
 static unsigned intel_find_arch_event(struct kvm_pmu *pmu,
@@ -73,6 +75,7 @@ static unsigned intel_find_arch_event(struct kvm_pmu *pmu,
 {
 	int i;
 
+  printk(KERN_NOTICE "I am in pmu_intel.c");
 	for (i = 0; i < ARRAY_SIZE(intel_arch_events); i++)
 		if (intel_arch_events[i].eventsel == event_select
 		    && intel_arch_events[i].unit_mask == unit_mask
@@ -87,6 +90,7 @@ static unsigned intel_find_arch_event(struct kvm_pmu *pmu,
 
 static unsigned intel_find_fixed_event(int idx)
 {
+  printk(KERN_NOTICE "I am in pmu_intel.c");
 	if (idx >= ARRAY_SIZE(fixed_pmc_events))
 		return PERF_COUNT_HW_MAX;
 
@@ -98,11 +102,13 @@ static bool intel_pmc_is_enabled(struct kvm_pmc *pmc)
 {
 	struct kvm_pmu *pmu = pmc_to_pmu(pmc);
 
+  printk(KERN_NOTICE "I am in pmu_intel.c");
 	return test_bit(pmc->idx, (unsigned long *)&pmu->global_ctrl);
 }
 
 static struct kvm_pmc *intel_pmc_idx_to_pmc(struct kvm_pmu *pmu, int pmc_idx)
 {
+  printk(KERN_NOTICE "I am in pmu_intel.c");
 	if (pmc_idx < INTEL_PMC_IDX_FIXED)
 		return get_gp_pmc(pmu, MSR_P6_EVNTSEL0 + pmc_idx,
 				  MSR_P6_EVNTSEL0);
@@ -121,6 +127,7 @@ static int intel_is_valid_msr_idx(struct kvm_vcpu *vcpu, unsigned idx)
 
 	idx &= ~(3u << 30);
 
+  printk(KERN_NOTICE "I am in pmu_intel.c");
 	return (!fixed && idx >= pmu->nr_arch_gp_counters) ||
 		(fixed && idx >= pmu->nr_arch_fixed_counters);
 }
@@ -132,6 +139,7 @@ static struct kvm_pmc *intel_msr_idx_to_pmc(struct kvm_vcpu *vcpu,
 	bool fixed = idx & (1u << 30);
 	struct kvm_pmc *counters;
 
+  printk(KERN_NOTICE "I am in pmu_intel.c");
 	idx &= ~(3u << 30);
 	if (!fixed && idx >= pmu->nr_arch_gp_counters)
 		return NULL;
@@ -147,6 +155,7 @@ static bool intel_is_valid_msr(struct kvm_vcpu *vcpu, u32 msr)
 	struct kvm_pmu *pmu = vcpu_to_pmu(vcpu);
 	int ret;
 
+  printk(KERN_NOTICE "I am in pmu_intel.c");
 	switch (msr) {
 	case MSR_CORE_PERF_FIXED_CTR_CTRL:
 	case MSR_CORE_PERF_GLOBAL_STATUS:
@@ -169,6 +178,7 @@ static int intel_pmu_get_msr(struct kvm_vcpu *vcpu, u32 msr, u64 *data)
 	struct kvm_pmu *pmu = vcpu_to_pmu(vcpu);
 	struct kvm_pmc *pmc;
 
+  printk(KERN_NOTICE "I am in pmu_intel.c");
 	switch (msr) {
 	case MSR_CORE_PERF_FIXED_CTR_CTRL:
 		*data = pmu->fixed_ctr_ctrl;
@@ -203,6 +213,7 @@ static int intel_pmu_set_msr(struct kvm_vcpu *vcpu, struct msr_data *msr_info)
 	u32 msr = msr_info->index;
 	u64 data = msr_info->data;
 
+  printk(KERN_NOTICE "I am in pmu_intel.c");
 	switch (msr) {
 	case MSR_CORE_PERF_FIXED_CTR_CTRL:
 		if (pmu->fixed_ctr_ctrl == data)
@@ -261,6 +272,7 @@ static void intel_pmu_refresh(struct kvm_vcpu *vcpu)
 	union cpuid10_eax eax;
 	union cpuid10_edx edx;
 
+  printk(KERN_NOTICE "I am in pmu_intel.c");
 	pmu->nr_arch_gp_counters = 0;
 	pmu->nr_arch_fixed_counters = 0;
 	pmu->counter_bitmask[KVM_PMC_GP] = 0;
@@ -310,6 +322,7 @@ static void intel_pmu_init(struct kvm_vcpu *vcpu)
 	int i;
 	struct kvm_pmu *pmu = vcpu_to_pmu(vcpu);
 
+  printk(KERN_NOTICE "I am in pmu_intel.c");
 	for (i = 0; i < INTEL_PMC_MAX_GENERIC; i++) {
 		pmu->gp_counters[i].type = KVM_PMC_GP;
 		pmu->gp_counters[i].vcpu = vcpu;
