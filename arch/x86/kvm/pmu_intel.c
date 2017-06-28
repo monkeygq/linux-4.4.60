@@ -173,14 +173,14 @@ static bool intel_is_valid_msr(struct kvm_vcpu *vcpu, u32 msr)
 	return ret;
 }
 
-static int intel_pmu_get_msr(struct kvm_vcpu *vcpu, u32 msr, u64 *data)
+static int intel_pmu_get_msr(struct kvm_vcpu *vcpu, u32 msr, u64 *data)// 读取PMU相关的msr
 {
 	struct kvm_pmu *pmu = vcpu_to_pmu(vcpu);
 	struct kvm_pmc *pmc;
 
   printk(KERN_NOTICE "I am intel_pmu_get_msr in pmu_intel.c");
 	switch (msr) {
-	case MSR_CORE_PERF_FIXED_CTR_CTRL:
+	case MSR_CORE_PERF_FIXED_CTR_CTRL:// 这四种case的情况都在intel的用户手册上 常量的值就是msr所在的位置
 		*data = pmu->fixed_ctr_ctrl;
 		return 0;
 	case MSR_CORE_PERF_GLOBAL_STATUS:
@@ -194,11 +194,11 @@ static int intel_pmu_get_msr(struct kvm_vcpu *vcpu, u32 msr, u64 *data)
 		return 0;
 	default:
 		if ((pmc = get_gp_pmc(pmu, msr, MSR_IA32_PERFCTR0)) ||
-		    (pmc = get_fixed_pmc(pmu, msr))) {
+		    (pmc = get_fixed_pmc(pmu, msr))) {// 如果不是上面四种情况 就是读取gp计数器或者fixed计数器的值
 			*data = pmc_read_counter(pmc);
 			return 0;
-		} else if ((pmc = get_gp_pmc(pmu, msr, MSR_P6_EVNTSEL0))) {
-			*data = pmc->eventsel;
+		} else if ((pmc = get_gp_pmc(pmu, msr, MSR_P6_EVNTSEL0))) {// 如果也不是计数器 那么就只能是性能事件选择器了
+			*data = pmc->eventsel;// PMU结构体中并没有包含性能事件选择器这个数组 而是在每个计数器中包含了性能事件选择器字段eventsel
 			return 0;
 		}
 	}
@@ -272,7 +272,7 @@ static void intel_pmu_refresh(struct kvm_vcpu *vcpu)
 	union cpuid10_eax eax;
 	union cpuid10_edx edx;
 
-  printk(KERN_NOTICE "I am intel_pmu_refresh in pmu_intel.c");
+  printk(KERN_NOTICE "I am intel_pmu_refresh in pmu_intel.c\n");
 	pmu->nr_arch_gp_counters = 0;
 	pmu->nr_arch_fixed_counters = 0;
 	pmu->counter_bitmask[KVM_PMC_GP] = 0;
@@ -286,24 +286,47 @@ static void intel_pmu_refresh(struct kvm_vcpu *vcpu)
 	eax.full = entry->eax;
 	edx.full = entry->edx;
 
+  /* 下面是测试 : 
+   * 由于最开始打印的时候发现只有refresh函数被打印多次 所以从这里看起 真的有收获
+   * 把物理机上CPUID 0AH 得到的eax和 edx的值，赋值给vcpu的eax和edx, 
+   * 相当于触发了vcpu的PMU的相关功能, 在执行perf命令的时候,打印的结果中发现perf用到了get_msr和set_msr函数,
+   * 正确方法应该是在vcpu初始化的时候把CPUID 0AH 加入到 vcpu->arch.cpuid_entries这个数组中,
+   * 这个数组的作用应该是模拟物理机cpu的CPUID指令的行为,
+   * 继续看get_msr set_msr两个函数.
+   */
+
+  /*
+  if(!eax.full)
+    eax.full = 120588291;
+  if(!edx.full)
+    edx.full = 1539;
+  printk(KERN_NOTICE "eax=%d\n", eax.full);
+  printk(KERN_NOTICE "edx=%d\n", edx.full);
+  printk(KERN_NOTICE "version_id=%d\n", eax.split.version_id);
+  printk(KERN_NOTICE "num_counters=%d\n", eax.split.num_counters);
+  printk(KERN_NOTICE "bit_width=%d\n", eax.split.bit_width);
+  printk(KERN_NOTICE "mask_length=%d\n", eax.split.mask_length);
+  printk(KERN_NOTICE "++++++++++++++++++++++++++++++++\n");
+  */
+
 	pmu->version = eax.split.version_id;
 	if (!pmu->version)
 		return;
 
 	pmu->nr_arch_gp_counters = min_t(int, eax.split.num_counters,
-					INTEL_PMC_MAX_GENERIC);
-	pmu->counter_bitmask[KVM_PMC_GP] = ((u64)1 << eax.split.bit_width) - 1;
+					INTEL_PMC_MAX_GENERIC);// gp_counters的数量
+	pmu->counter_bitmask[KVM_PMC_GP] = ((u64)1 << eax.split.bit_width) - 1;// gp_counter的长度, #{bit_width}个1 通过&操作把计数器中超过长度的数截掉
 	pmu->available_event_types = ~entry->ebx &
-					((1ull << eax.split.mask_length) - 1);
+					((1ull << eax.split.mask_length) - 1);// 所支持的性能监控事件
 
 	if (pmu->version == 1) {
-		pmu->nr_arch_fixed_counters = 0;
+		pmu->nr_arch_fixed_counters = 0;// version 1 没有fixed counters
 	} else {
 		pmu->nr_arch_fixed_counters =
 			min_t(int, edx.split.num_counters_fixed,
-				INTEL_PMC_MAX_FIXED);
+				INTEL_PMC_MAX_FIXED);// fixed_counters的数量 #{bit_width}个1 通过&操作把计数器中超过长度的数截掉
 		pmu->counter_bitmask[KVM_PMC_FIXED] =
-			((u64)1 << edx.split.bit_width_fixed) - 1;
+			((u64)1 << edx.split.bit_width_fixed) - 1;// fixed_counter的长度, #{bit_width}个1
 	}
 
 	pmu->global_ctrl = ((1 << pmu->nr_arch_gp_counters) - 1) |
