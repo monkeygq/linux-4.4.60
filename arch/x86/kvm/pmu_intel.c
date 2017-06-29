@@ -76,7 +76,7 @@ static void global_ctrl_changed(struct kvm_pmu *pmu, u64 data)// 被set_msr函�
 static unsigned intel_find_arch_event(struct kvm_pmu *pmu,
 				      u8 event_select,
 				      u8 unit_mask)
-{
+{// 根据event_select和unit_mask两个字段寻找intel_arch_events数组中对应的监控事件
 	int i;
 
   printk(KERN_NOTICE "I am intel_find_arch_event in pmu_intel.c");
@@ -86,15 +86,17 @@ static unsigned intel_find_arch_event(struct kvm_pmu *pmu,
 		    && (pmu->available_event_types & (1 << i)))
 			break;
 
-	if (i == ARRAY_SIZE(intel_arch_events))
-		return PERF_COUNT_HW_MAX;
+	if (i == ARRAY_SIZE(intel_arch_events))// 如果执行这句 证明没有找到对应的监控事件
+		return PERF_COUNT_HW_MAX;// 返回常量 10
 
-	return intel_arch_events[i].event_type;
+	return intel_arch_events[i].event_type;// 返回对应的监控事件的常量值
 }
 
 static unsigned intel_find_fixed_event(int idx)
 {
   printk(KERN_NOTICE "I am intel_find_fixed_event in pmu_intel.c");
+  // fixed_pmc_event = [1,0,7] 1,0,7 对应intel_arch_events的数组下标
+  // idx >= 3 表明没找到
 	if (idx >= ARRAY_SIZE(fixed_pmc_events))
 		return PERF_COUNT_HW_MAX;
 
@@ -102,11 +104,13 @@ static unsigned intel_find_fixed_event(int idx)
 }
 
 /* check if a PMC is enabled by comparising it with globl_ctrl bits. */
-static bool intel_pmc_is_enabled(struct kvm_pmc *pmc)
+static bool intel_pmc_is_enabled(struct kvm_pmc *pmc)// 根据pmu中的global_ctrl中对应控制pmc的某位的值来判断是否enabled
 {
 	struct kvm_pmu *pmu = pmc_to_pmu(pmc);
 
   printk(KERN_NOTICE "I am intel_pmc_is_enabled in pmu_intel.c");
+  //根据init函数可知 pmc->idx恰好对应pmu->global_ctrl的控制位
+  //test_bit检测global_ctrl的对应位是否为1 是返回1 不是返回0
 	return test_bit(pmc->idx, (unsigned long *)&pmu->global_ctrl);
 }
 
@@ -299,7 +303,6 @@ static void intel_pmu_refresh(struct kvm_vcpu *vcpu)
    * 继续看get_msr set_msr两个函数.
    */
 
-  /*
   if(!eax.full)
     eax.full = 120588291;
   if(!edx.full)
@@ -311,7 +314,6 @@ static void intel_pmu_refresh(struct kvm_vcpu *vcpu)
   printk(KERN_NOTICE "bit_width=%d\n", eax.split.bit_width);
   printk(KERN_NOTICE "mask_length=%d\n", eax.split.mask_length);
   printk(KERN_NOTICE "++++++++++++++++++++++++++++++++\n");
-  */
 
 	pmu->version = eax.split.version_id;
 	if (!pmu->version)
@@ -363,7 +365,7 @@ static void intel_pmu_init(struct kvm_vcpu *vcpu)
 	}
 }
 
-static void intel_pmu_reset(struct kvm_vcpu *vcpu)
+static void intel_pmu_reset(struct kvm_vcpu *vcpu)// 归零
 {
 	struct kvm_pmu *pmu = vcpu_to_pmu(vcpu);
 	int i;
