@@ -178,10 +178,10 @@ void reprogram_gp_counter(struct kvm_pmc *pmc, u64 eventsel)
 }
 EXPORT_SYMBOL_GPL(reprogram_gp_counter);
 
-void reprogram_fixed_counter(struct kvm_pmc *pmc, u8 ctrl, int idx)
+void reprogram_fixed_counter(struct kvm_pmc *pmc, u8 ctrl, int idx)// 被pmu_intel.c中的reprogram_fixed_counter函数调用
 {
-	unsigned en_field = ctrl & 0x3;
-	bool pmi = ctrl & 0x8;
+	unsigned en_field = ctrl & 0x3;// 得到IA32_FIXED_CTR_CTRL MSR 中对应fixed计数器的控制字段EN
+	bool pmi = ctrl & 0x8;// 得到IA32_FIXED_CTR_CTRL MSR 中对应fixed计数器的控制字段PMI
 
 	pmc_stop_counter(pmc);
 

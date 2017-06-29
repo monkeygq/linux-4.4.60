@@ -35,11 +35,15 @@ static struct kvm_event_hw_type_mapping intel_arch_events[] = {
 /* mapping between fixed pmc index and intel_arch_events array */
 static int fixed_pmc_events[] = {1, 0, 7};
 
-static void reprogram_fixed_counters(struct kvm_pmu *pmu, u64 data)
+static void reprogram_fixed_counters(struct kvm_pmu *pmu, u64 data)// 被set_msr函数调用 
 {
 	int i;
 
 	for (i = 0; i < pmu->nr_arch_fixed_counters; i++) {
+    /* data表示set_msr函数中的data参数 也就是要给IA32_FIEXD_CTR_CTRL MSR 赋的值
+     * fixed_ctr_ctrl这个函数获取对应的fixed计数器对应的4位控制字段
+     * data中0-4位 5-7位 8-11位 分别表示第1 2 3 个fixed计数器的控制字段
+     */
 		u8 new_ctrl = fixed_ctrl_field(data, i);
 		u8 old_ctrl = fixed_ctrl_field(pmu->fixed_ctr_ctrl, i);
 		struct kvm_pmc *pmc;
@@ -57,7 +61,7 @@ static void reprogram_fixed_counters(struct kvm_pmu *pmu, u64 data)
 }
 
 /* function is called when global control register has been updated. */
-static void global_ctrl_changed(struct kvm_pmu *pmu, u64 data)
+static void global_ctrl_changed(struct kvm_pmu *pmu, u64 data)// 被set_msr函数调用
 {
 	int bit;
 	u64 diff = pmu->global_ctrl ^ data;
@@ -219,7 +223,7 @@ static int intel_pmu_set_msr(struct kvm_vcpu *vcpu, struct msr_data *msr_info)
 		if (pmu->fixed_ctr_ctrl == data)
 			return 0;
 		if (!(data & 0xfffffffffffff444ull)) {
-			reprogram_fixed_counters(pmu, data);
+			reprogram_fixed_counters(pmu, data);// 根据data的4位控制字段修改相应的pmc 没完全读懂
 			return 0;
 		}
 		break;
