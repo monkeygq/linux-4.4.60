@@ -79,7 +79,7 @@ static unsigned intel_find_arch_event(struct kvm_pmu *pmu,
 {// 根据event_select和unit_mask两个字段寻找intel_arch_events数组中对应的监控事件
 	int i;
 
-  printk(KERN_NOTICE "I am intel_find_arch_event in pmu_intel.c\n");
+  //printk(KERN_NOTICE "I am intel_find_arch_event in pmu_intel.c\n");
 	for (i = 0; i < ARRAY_SIZE(intel_arch_events); i++)
 		if (intel_arch_events[i].eventsel == event_select
 		    && intel_arch_events[i].unit_mask == unit_mask
@@ -108,7 +108,7 @@ static bool intel_pmc_is_enabled(struct kvm_pmc *pmc)// 根据pmu中的global_ct
 {
 	struct kvm_pmu *pmu = pmc_to_pmu(pmc);
 
-  printk(KERN_NOTICE "I am intel_pmc_is_enabled in pmu_intel.c\n");
+  //printk(KERN_NOTICE "I am intel_pmc_is_enabled in pmu_intel.c\n");
   //根据init函数可知 pmc->idx恰好对应pmu->global_ctrl的控制位
   //test_bit检测global_ctrl的对应位是否为1 是返回1 不是返回0
 	return test_bit(pmc->idx, (unsigned long *)&pmu->global_ctrl);
@@ -163,7 +163,7 @@ static bool intel_is_valid_msr(struct kvm_vcpu *vcpu, u32 msr)
 	struct kvm_pmu *pmu = vcpu_to_pmu(vcpu);
 	int ret;
 
-  printk(KERN_NOTICE "I am intel_is_valid_msr in pmu_intel.c\n");
+  //printk(KERN_NOTICE "I am intel_is_valid_msr in pmu_intel.c\n");
 	switch (msr) {
 	case MSR_CORE_PERF_FIXED_CTR_CTRL:
 	case MSR_CORE_PERF_GLOBAL_STATUS:
@@ -186,27 +186,33 @@ static int intel_pmu_get_msr(struct kvm_vcpu *vcpu, u32 msr, u64 *data)// 读取
 	struct kvm_pmu *pmu = vcpu_to_pmu(vcpu);
 	struct kvm_pmc *pmc;
 
-  printk(KERN_NOTICE "I am intel_pmu_get_msr in pmu_intel.c\n");
+  //printk(KERN_NOTICE "I am intel_pmu_get_msr in pmu_intel.c\n");
 	switch (msr) {
 	case MSR_CORE_PERF_FIXED_CTR_CTRL:// 这四种case的情况都在intel的用户手册上 常量的值就是msr所在的位置
 		*data = pmu->fixed_ctr_ctrl;
+    printk(KERN_NOTICE "get_msr : %X, data : %llu\n", msr, *data);
 		return 0;
 	case MSR_CORE_PERF_GLOBAL_STATUS:
 		*data = pmu->global_status;
+    printk(KERN_NOTICE "get_msr : %X, data : %llu\n", msr, *data);
 		return 0;
 	case MSR_CORE_PERF_GLOBAL_CTRL:
 		*data = pmu->global_ctrl;
+    printk(KERN_NOTICE "get_msr : %X, data : %llu\n", msr, *data);
 		return 0;
 	case MSR_CORE_PERF_GLOBAL_OVF_CTRL:
 		*data = pmu->global_ovf_ctrl;
+    printk(KERN_NOTICE "get_msr : %X, data : %llu\n", msr, *data);
 		return 0;
 	default:
 		if ((pmc = get_gp_pmc(pmu, msr, MSR_IA32_PERFCTR0)) ||
 		    (pmc = get_fixed_pmc(pmu, msr))) {// 如果不是上面四种情况 就是读取gp计数器或者fixed计数器的值
 			*data = pmc_read_counter(pmc);
+      printk(KERN_NOTICE "get_msr : %X, data : %llu\n", msr, *data);
 			return 0;
 		} else if ((pmc = get_gp_pmc(pmu, msr, MSR_P6_EVNTSEL0))) {// 如果也不是计数器 那么就只能是性能事件选择器了
 			*data = pmc->eventsel;// PMU结构体中并没有包含性能事件选择器这个数组 而是在每个计数器中包含了性能事件选择器字段eventsel
+      printk(KERN_NOTICE "get_msr : %X, data : %llu\n", msr, *data);
 			return 0;
 		}
 	}
@@ -221,7 +227,8 @@ static int intel_pmu_set_msr(struct kvm_vcpu *vcpu, struct msr_data *msr_info)
 	u32 msr = msr_info->index;
 	u64 data = msr_info->data;
 
-  printk(KERN_NOTICE "I am intel_pmu_set_msr in pmu_intel.c\n");
+  //printk(KERN_NOTICE "I am intel_pmu_set_msr in pmu_intel.c\n");
+  printk(KERN_NOTICE "set_msr : %X, data : %llu\n", msr, data);
 	switch (msr) {
 	case MSR_CORE_PERF_FIXED_CTR_CTRL:
 		if (pmu->fixed_ctr_ctrl == data)
@@ -259,11 +266,17 @@ static int intel_pmu_set_msr(struct kvm_vcpu *vcpu, struct msr_data *msr_info)
 			if (!msr_info->host_initiated)
 				data = (s64)(s32)data;
 			pmc->counter += data - pmc_read_counter(pmc);
+      printk(KERN_NOTICE "pmc->counter : %llu\n", pmc->counter);
 			return 0;
 		} else if ((pmc = get_gp_pmc(pmu, msr, MSR_P6_EVNTSEL0))) {
+      printk(KERN_NOTICE "pmc->eventsel : %llu\n", pmc->eventsel);
+      printk(KERN_NOTICE "pmu->reserved_bits : %llu\n", pmu->reserved_bits);
+      printk(KERN_NOTICE "pmu->nr_arch_gp_counters : %d\n", pmu->nr_arch_gp_counters);
+      printk(KERN_NOTICE "pmu->nr_arch_fixed_counters : %d\n", pmu->nr_arch_fixed_counters);
 			if (data == pmc->eventsel)
 				return 0;
 			if (!(data & pmu->reserved_bits)) {
+        printk(KERN_NOTICE "reprogram_gp_counter start========");
 				reprogram_gp_counter(pmc, data);
 				return 0;
 			}

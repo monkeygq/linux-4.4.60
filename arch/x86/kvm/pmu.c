@@ -136,37 +136,37 @@ static void pmc_reprogram_counter(struct kvm_pmc *pmc, u32 type,
 	clear_bit(pmc->idx, (unsigned long*)&pmc_to_pmu(pmc)->reprogram_pmi);
 }
 
-void reprogram_gp_counter(struct kvm_pmc *pmc, u64 eventsel)
+void reprogram_gp_counter(struct kvm_pmc *pmc, u64 eventsel)// 被set_msr调用
 {
-	unsigned config, type = PERF_TYPE_RAW;
+	unsigned config, type = PERF_TYPE_RAW;// type = 4
 	u8 event_select, unit_mask;
 
-	if (eventsel & ARCH_PERFMON_EVENTSEL_PIN_CONTROL)
+	if (eventsel & ARCH_PERFMON_EVENTSEL_PIN_CONTROL)// 常量是 1ULL << 19 代表事件选择器的PC(pin control)字段
 		printk_once("kvm pmu: pin control bit is ignored\n");
 
-	pmc->eventsel = eventsel;
+	pmc->eventsel = eventsel;//把set_msr的data给pmc->eventsel
 
 	pmc_stop_counter(pmc);
 
 	if (!(eventsel & ARCH_PERFMON_EVENTSEL_ENABLE) || !pmc_is_enabled(pmc))
-		return;
+		return;// 如果事件选择器的EN字段为0 或者 pmc不可用 那么就返回
 
-	event_select = eventsel & ARCH_PERFMON_EVENTSEL_EVENT;
-	unit_mask = (eventsel & ARCH_PERFMON_EVENTSEL_UMASK) >> 8;
+	event_select = eventsel & ARCH_PERFMON_EVENTSEL_EVENT;// 得到事件选择器的event_select字段
+	unit_mask = (eventsel & ARCH_PERFMON_EVENTSEL_UMASK) >> 8;// 得到事件选择器的unit_mask字段
 
 	if (!(eventsel & (ARCH_PERFMON_EVENTSEL_EDGE |
 			  ARCH_PERFMON_EVENTSEL_INV |
 			  ARCH_PERFMON_EVENTSEL_CMASK |
 			  HSW_IN_TX |
-			  HSW_IN_TX_CHECKPOINTED))) {
+			  HSW_IN_TX_CHECKPOINTED))) {// eventsel中这些字段的值都为0 这个if中的代码才会执行
 		config = kvm_x86_ops->pmu_ops->find_arch_event(pmc_to_pmu(pmc),
 						      event_select,
-						      unit_mask);
-		if (config != PERF_COUNT_HW_MAX)
-			type = PERF_TYPE_HARDWARE;
+						      unit_mask);// 调用pmu_intel.c中的intel_find_arch_event函数 返回intel_arch_events数组中的事件常量
+		if (config != PERF_COUNT_HW_MAX)// 在intel_arch_events数组中找到了
+			type = PERF_TYPE_HARDWARE;// type = 0 表示这个事件是 硬件事件
 	}
 
-	if (type == PERF_TYPE_RAW)
+	if (type == PERF_TYPE_RAW)// 由于type初始值为4 也就是说在上面的数组中没找到就执行if中的代码
 		config = eventsel & X86_RAW_EVENT_MASK;
 
 	pmc_reprogram_counter(pmc, type, config,
