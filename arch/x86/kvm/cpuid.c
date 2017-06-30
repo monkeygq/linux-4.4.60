@@ -204,7 +204,7 @@ out:
 
 int kvm_vcpu_ioctl_set_cpuid2(struct kvm_vcpu *vcpu,
 			      struct kvm_cpuid2 *cpuid,
-			      struct kvm_cpuid_entry2 __user *entries)
+			      struct kvm_cpuid_entry2 __user *entries)// 
 {
 	int r;
 

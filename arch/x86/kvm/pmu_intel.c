@@ -148,6 +148,7 @@ static struct kvm_pmc *intel_msr_idx_to_pmc(struct kvm_vcpu *vcpu,
 	struct kvm_pmc *counters;
 
   printk(KERN_NOTICE "I am intel_msr_idx_to_pmc in pmu_intel.c\n");
+  printk(KERN_NOTICE "msr_idx_is : %X\n", idx);
 	idx &= ~(3u << 30);
 	if (!fixed && idx >= pmu->nr_arch_gp_counters)
 		return NULL;
@@ -269,10 +270,8 @@ static int intel_pmu_set_msr(struct kvm_vcpu *vcpu, struct msr_data *msr_info)
       printk(KERN_NOTICE "pmc->counter : %llu\n", pmc->counter);
 			return 0;
 		} else if ((pmc = get_gp_pmc(pmu, msr, MSR_P6_EVNTSEL0))) {
-      printk(KERN_NOTICE "pmc->eventsel : %llu\n", pmc->eventsel);
-      printk(KERN_NOTICE "pmu->reserved_bits : %llu\n", pmu->reserved_bits);
-      printk(KERN_NOTICE "pmu->nr_arch_gp_counters : %d\n", pmu->nr_arch_gp_counters);
-      printk(KERN_NOTICE "pmu->nr_arch_fixed_counters : %d\n", pmu->nr_arch_fixed_counters);
+      //printk(KERN_NOTICE "pmc->eventsel : %llu\n", pmc->eventsel);
+      //printk(KERN_NOTICE "pmu->reserved_bits : %llu\n", pmu->reserved_bits);
 			if (data == pmc->eventsel)
 				return 0;
 			if (!(data & pmu->reserved_bits)) {
@@ -287,6 +286,7 @@ static int intel_pmu_set_msr(struct kvm_vcpu *vcpu, struct msr_data *msr_info)
 }
 
 static void intel_pmu_refresh(struct kvm_vcpu *vcpu)
+// 被arch/x86/kvm/cpuid.c 中 kvm_update_cpuid 函数调用
 {
 	struct kvm_pmu *pmu = vcpu_to_pmu(vcpu);
 	struct kvm_cpuid_entry2 *entry;
