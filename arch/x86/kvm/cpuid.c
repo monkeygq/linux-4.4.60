@@ -112,7 +112,7 @@ int kvm_update_cpuid(struct kvm_vcpu *vcpu)
 
 	/* Update physical-address width */
 	vcpu->arch.maxphyaddr = cpuid_query_maxphyaddr(vcpu);
-
+  printk(KERN_NOTICE "I am kvm_update_cpuid in cpuid.c refresh will be invoked\n");
 	kvm_pmu_refresh(vcpu);
 	return 0;
 }
@@ -163,6 +163,10 @@ EXPORT_SYMBOL_GPL(cpuid_query_maxphyaddr);
 int kvm_vcpu_ioctl_set_cpuid(struct kvm_vcpu *vcpu,
 			     struct kvm_cpuid *cpuid,
 			     struct kvm_cpuid_entry __user *entries)
+  /* 用于初始化vcpu->arch.cpuid_entries数组
+   * 被x86.c中的kvm_arch_vcpu_ioctl函数调用
+   * 为了把CPUID.EAX 0AH 加进数组也是好难
+   */
 {
 	int r, i;
 	struct kvm_cpuid_entry *cpuid_entries;
@@ -176,9 +180,9 @@ int kvm_vcpu_ioctl_set_cpuid(struct kvm_vcpu *vcpu,
 		goto out;
 	r = -EFAULT;
 	if (copy_from_user(cpuid_entries, entries,
-			   cpuid->nent * sizeof(struct kvm_cpuid_entry)))
+			   cpuid->nent * sizeof(struct kvm_cpuid_entry)))// copy_from_user函数执行成功返回0
 		goto out_free;
-	for (i = 0; i < cpuid->nent; i++) {
+	for (i = 0; i < cpuid->nent; i++) {//赋值
 		vcpu->arch.cpuid_entries[i].function = cpuid_entries[i].function;
 		vcpu->arch.cpuid_entries[i].eax = cpuid_entries[i].eax;
 		vcpu->arch.cpuid_entries[i].ebx = cpuid_entries[i].ebx;

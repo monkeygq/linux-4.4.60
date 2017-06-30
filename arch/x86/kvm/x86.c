@@ -3271,8 +3271,8 @@ long kvm_arch_vcpu_ioctl(struct file *filp,
 		r = kvm_vcpu_ioctl_smi(vcpu);
 		break;
 	}
-	case KVM_SET_CPUID: {
-		struct kvm_cpuid __user *cpuid_arg = argp;
+	case KVM_SET_CPUID: {// 用于初始化vcpu->arch.cpuid_entries数组
+		struct kvm_cpuid __user *cpuid_arg = argp;// 这个操作是什么意思
 		struct kvm_cpuid cpuid;
 
 		r = -EFAULT;
