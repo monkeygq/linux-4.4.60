@@ -211,6 +211,7 @@ int kvm_vcpu_ioctl_set_cpuid2(struct kvm_vcpu *vcpu,
 			      struct kvm_cpuid_entry2 __user *entries)// 
 {
 	int r;
+  int i, regs[4];
 
 	r = -E2BIG;
 	if (cpuid->nent > KVM_MAX_CPUID_ENTRIES)
@@ -222,6 +223,22 @@ int kvm_vcpu_ioctl_set_cpuid2(struct kvm_vcpu *vcpu,
 	vcpu->arch.cpuid_nent = cpuid->nent;
 	kvm_apic_set_version(vcpu);
 	kvm_x86_ops->cpuid_update(vcpu);
+  for(i=0; i<vcpu->arch.cpuid_nent; i++)
+  {
+    if(vcpu->arch.cpuid_entries[i].function == 10)
+    {
+      __asm__("movl $0x0a, %eax");
+      __asm__(
+          "cpuid"
+          :"=a"(regs[0]), "=b"(regs[1]), "=c"(regs[2]), "=d"(regs[3])
+          );
+      vcpu->arch.cpuid_entries[i].eax = regs[0];
+      vcpu->arch.cpuid_entries[i].ebx = regs[1];
+      vcpu->arch.cpuid_entries[i].ecx = regs[2];
+      vcpu->arch.cpuid_entries[i].edx = regs[3];
+      break;
+    }
+  }
 	r = kvm_update_cpuid(vcpu);
 out:
 	return r;

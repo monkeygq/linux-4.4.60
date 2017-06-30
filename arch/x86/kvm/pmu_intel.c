@@ -315,11 +315,12 @@ static void intel_pmu_refresh(struct kvm_vcpu *vcpu)
    * 这个数组的作用应该是模拟物理机cpu的CPUID指令的行为,
    * 继续看get_msr set_msr两个函数.
    */
-
+  /*
   if(!eax.full)
     eax.full = 120588291;
   if(!edx.full)
     edx.full = 1539;
+  */
   printk(KERN_NOTICE "eax=%d\n", eax.full);
   printk(KERN_NOTICE "edx=%d\n", edx.full);
   printk(KERN_NOTICE "version_id=%d\n", eax.split.version_id);
