@@ -642,6 +642,7 @@
 #define MSR_P4_PEBS_MATRIX_VERT		0x000003f2
 
 /* Intel Core-based CPU performance counters */
+/* PMU中用到的一些MSR的地址*/
 #define MSR_CORE_PERF_FIXED_CTR0	0x00000309
 #define MSR_CORE_PERF_FIXED_CTR1	0x0000030a
 #define MSR_CORE_PERF_FIXED_CTR2	0x0000030b
