@@ -208,7 +208,7 @@ out:
 
 int kvm_vcpu_ioctl_set_cpuid2(struct kvm_vcpu *vcpu,
 			      struct kvm_cpuid2 *cpuid,
-			      struct kvm_cpuid_entry2 __user *entries)// 
+			      struct kvm_cpuid_entry2 __user *entries)// 被arch/x86/kvm/x86.c中的kvm_arch_vcpu_ioctl调用
 {
 	int r;
   int i, regs[4];
@@ -222,7 +222,7 @@ int kvm_vcpu_ioctl_set_cpuid2(struct kvm_vcpu *vcpu,
 		goto out;
 	vcpu->arch.cpuid_nent = cpuid->nent;
 	kvm_apic_set_version(vcpu);
-	kvm_x86_ops->cpuid_update(vcpu);
+	kvm_x86_ops->cpuid_update(vcpu);// 调用vmx.c中的vmx_cpuid_update函数
   for(i=0; i<vcpu->arch.cpuid_nent; i++)
   {
     if(vcpu->arch.cpuid_entries[i].function == 10)

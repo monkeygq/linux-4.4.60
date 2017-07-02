@@ -3275,6 +3275,7 @@ long kvm_arch_vcpu_ioctl(struct file *filp,
 		struct kvm_cpuid __user *cpuid_arg = argp;// 这个操作是什么意思
 		struct kvm_cpuid cpuid;
 
+    printk(KERN_INFO "I am KVM_SET_CPUID in x86.c");
 		r = -EFAULT;
 		if (copy_from_user(&cpuid, cpuid_arg, sizeof cpuid))
 			goto out;
@@ -3282,9 +3283,14 @@ long kvm_arch_vcpu_ioctl(struct file *filp,
 		break;
 	}
 	case KVM_SET_CPUID2: {
+    /* 当执行virsh start命令的时候 set_cpuid2会执行 set_cpuid2到update再到refresh
+     * 按照我的理解set_cpuid应该是先于set_cpuid2被执行的 但是在virsh start的时候没有执行
+     * 也就是说vcpu->arch.cpuid_entries是什么时候初始化的 
+     */
 		struct kvm_cpuid2 __user *cpuid_arg = argp;
 		struct kvm_cpuid2 cpuid;
 
+    printk(KERN_INFO "I am KVM_SET_CPUID2 in x86.c");
 		r = -EFAULT;
 		if (copy_from_user(&cpuid, cpuid_arg, sizeof cpuid))
 			goto out;
