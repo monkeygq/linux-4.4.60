@@ -896,7 +896,7 @@ struct kvm_x86_ops {
 					   struct kvm_memory_slot *slot,
 					   gfn_t offset, unsigned long mask);
 	/* pmu operations of sub-arch */
-	const struct kvm_pmu_ops *pmu_ops;
+	const struct kvm_pmu_ops *pmu_ops;// 对于pmu的操作包含在kvm_x86_ops结构体中
 
 	/*
 	 * Architecture specific hooks for vCPU blocking due to
