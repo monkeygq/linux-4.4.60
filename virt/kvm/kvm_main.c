@@ -2533,6 +2533,11 @@ out_free1:
 	}
 	default:
 		r = kvm_arch_vcpu_ioctl(filp, ioctl, arg);
+    /* 这里就是获取CPUID的接口函数了 
+     * 调用这个接口函数的是qemu中 target/i386/kvm.c中的 
+     * r = kvm_vcpu_ioctl(cs, KVM_SET_CPUID2, &cpuid_data)
+     * 所以想要修改CPUID.EAX OAH的值 必须去qemu中修改参数cpuid_data的值
+     */
 	}
 out:
 	vcpu_put(vcpu);
