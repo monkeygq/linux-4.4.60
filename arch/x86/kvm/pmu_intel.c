@@ -167,7 +167,7 @@ static bool intel_is_valid_msr(struct kvm_vcpu *vcpu, u32 msr)
 	struct kvm_pmu *pmu = vcpu_to_pmu(vcpu);
 	int ret;
 
-  //printk(KERN_NOTICE "I am intel_is_valid_msr in pmu_intel.c\n");
+  printk(KERN_NOTICE "I am intel_is_valid_msr in pmu_intel.c\n");
 	switch (msr) {
 	case MSR_CORE_PERF_FIXED_CTR_CTRL:
 	case MSR_CORE_PERF_GLOBAL_STATUS:

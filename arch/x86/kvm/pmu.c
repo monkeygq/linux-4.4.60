@@ -248,10 +248,15 @@ int kvm_pmu_is_valid_msr_idx(struct kvm_vcpu *vcpu, unsigned idx)
 }
 
 int kvm_pmu_rdpmc(struct kvm_vcpu *vcpu, unsigned idx, u64 *data)
+  /*
+   * 读取pmc的值 调用pmu_intel.c中的intel_msr_idx_to_pmc
+   * 成功返回0 失败返回1
+   */
 {
 	bool fast_mode = idx & (1u << 31);
 	struct kvm_pmc *pmc;
 	u64 ctr_val;
+  printk(KERN_NOTICE "I am kvm_pmu_rdpmc in pmu.c");
 
 	pmc = kvm_x86_ops->pmu_ops->msr_idx_to_pmc(vcpu, idx);
 	if (!pmc)
