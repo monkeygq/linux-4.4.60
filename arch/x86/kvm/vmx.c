@@ -7486,6 +7486,11 @@ static int handle_pcommit(struct kvm_vcpu *vcpu)
  * to be done to userspace and return 0.
  */
 static int (*const kvm_vmx_exit_handlers[])(struct kvm_vcpu *vcpu) = {
+  /*
+   * vmx_exit的处理函数指针数组
+   * get_msr set_msr rdpmc 应该都会导致exit
+   * 然后在vmx.c中的函数vmx_handle_exit进行处理
+   */
 	[EXIT_REASON_EXCEPTION_NMI]           = handle_exception,
 	[EXIT_REASON_EXTERNAL_INTERRUPT]      = handle_external_interrupt,
 	[EXIT_REASON_TRIPLE_FAULT]            = handle_triple_fault,
@@ -8062,6 +8067,9 @@ static void dump_vmcs(void)
  * assistance.
  */
 static int vmx_handle_exit(struct kvm_vcpu *vcpu)
+  /* 
+   * vmx_exit处理函数
+   */
 {
 	struct vcpu_vmx *vmx = to_vmx(vcpu);
 	u32 exit_reason = vmx->exit_reason;

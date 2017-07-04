@@ -119,7 +119,7 @@ static bool intel_pmc_is_enabled(struct kvm_pmc *pmc)// 根据pmu中的global_ct
 
 static struct kvm_pmc *intel_pmc_idx_to_pmc(struct kvm_pmu *pmu, int pmc_idx)
 {
-  printk(KERN_NOTICE "intel_pmc_idx: %d to_pmc in pmu_intel.c\n", pmc_idx);
+  //printk(KERN_NOTICE "intel_pmc_idx: %d to_pmc in pmu_intel.c\n", pmc_idx);
 	if (pmc_idx < INTEL_PMC_IDX_FIXED)
 		return get_gp_pmc(pmu, MSR_P6_EVNTSEL0 + pmc_idx,
 				  MSR_P6_EVNTSEL0);

@@ -932,6 +932,7 @@ bool kvm_rdpmc(struct kvm_vcpu *vcpu)
 	u32 ecx = kvm_register_read(vcpu, VCPU_REGS_RCX);
 	u64 data;
 	int err;
+  printk(KERN_NOTICE "I am kvm_rdpmc in x86.c\n");
 
 	err = kvm_pmu_rdpmc(vcpu, ecx, &data);
 	if (err)
@@ -4936,6 +4937,7 @@ static int emulator_check_pmc(struct x86_emulate_ctxt *ctxt,
 static int emulator_read_pmc(struct x86_emulate_ctxt *ctxt,
 			     u32 pmc, u64 *pdata)
 {
+  printk(KERN_NOTICE "I am emulator_read_pmc\n");
 	return kvm_pmu_rdpmc(emul_to_vcpu(ctxt), pmc, pdata);
 }
 
