@@ -103,6 +103,9 @@ static void pmc_reprogram_counter(struct kvm_pmc *pmc, u32 type,
 				  unsigned config, bool exclude_user,
 				  bool exclude_kernel, bool intr,
 				  bool in_tx, bool in_tx_cp)
+  /*
+   * reprogram pmc中的一些控制字段 没有很仔细看
+   */
 {
 	struct perf_event *event;
 	struct perf_event_attr attr = {
@@ -144,7 +147,7 @@ void reprogram_gp_counter(struct kvm_pmc *pmc, u64 eventsel)// 被set_msr调用
 	if (eventsel & ARCH_PERFMON_EVENTSEL_PIN_CONTROL)// 常量是 1ULL << 19 代表事件选择器的PC(pin control)字段
 		printk_once("kvm pmu: pin control bit is ignored\n");
 
-	pmc->eventsel = eventsel;//把set_msr的data给pmc->eventsel
+	pmc->eventsel = eventsel;
 
 	pmc_stop_counter(pmc);
 
@@ -197,6 +200,10 @@ void reprogram_fixed_counter(struct kvm_pmc *pmc, u8 ctrl, int idx)// 被pmu_int
 EXPORT_SYMBOL_GPL(reprogram_fixed_counter);
 
 void reprogram_counter(struct kvm_pmu *pmu, int pmc_idx)
+  /*
+   * 在global_ctrl变化的时候 每一个变化的位(对应一个pmc)都会执行一次该函数
+   * 然后再调用相应的reprogram_gp_counter或者reprogram_fixed_counter
+   */
 {
 	struct kvm_pmc *pmc = kvm_x86_ops->pmu_ops->pmc_idx_to_pmc(pmu, pmc_idx);
 

@@ -61,14 +61,17 @@ static void reprogram_fixed_counters(struct kvm_pmu *pmu, u64 data)// 被set_msr
 }
 
 /* function is called when global control register has been updated. */
-static void global_ctrl_changed(struct kvm_pmu *pmu, u64 data)// 被set_msr函数调用
+static void global_ctrl_changed(struct kvm_pmu *pmu, u64 data)
+  /*
+   * 被set_msr函数调用 case:global_ctrl
+   */
 {
 	int bit;
-	u64 diff = pmu->global_ctrl ^ data;
+	u64 diff = pmu->global_ctrl ^ data;// 新旧的global_ctrl异或 diff存储了变化了的位
 
-	pmu->global_ctrl = data;
+	pmu->global_ctrl = data;// 赋值新的global_ctrl
 
-	for_each_set_bit(bit, (unsigned long *)&diff, X86_PMC_IDX_MAX)
+	for_each_set_bit(bit, (unsigned long *)&diff, X86_PMC_IDX_MAX)//对diff中每一个置1的位调用reprogram_counter
 		reprogram_counter(pmu, bit);
   printk(KERN_NOTICE "I am global_ctrl_changed in pmu_intel.c\n");
 }
@@ -116,7 +119,7 @@ static bool intel_pmc_is_enabled(struct kvm_pmc *pmc)// 根据pmu中的global_ct
 
 static struct kvm_pmc *intel_pmc_idx_to_pmc(struct kvm_pmu *pmu, int pmc_idx)
 {
-  printk(KERN_NOTICE "I am intel_pmc_idx_to_pmc in pmu_intel.c\n");
+  printk(KERN_NOTICE "intel_pmc_idx: %d to_pmc in pmu_intel.c\n", pmc_idx);
 	if (pmc_idx < INTEL_PMC_IDX_FIXED)
 		return get_gp_pmc(pmu, MSR_P6_EVNTSEL0 + pmc_idx,
 				  MSR_P6_EVNTSEL0);
