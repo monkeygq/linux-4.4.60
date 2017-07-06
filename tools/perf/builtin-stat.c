@@ -1237,6 +1237,9 @@ static int add_default_attributes(void)
 }
 
 int cmd_stat(int argc, const char **argv, const char *prefix __maybe_unused)
+  /*
+   * 处理运行 perf stat 命令的函数
+   */
 {
 	const char * const stat_usage[] = {
 		"perf stat [<options>] [<command>]",

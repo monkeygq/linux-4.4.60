@@ -410,7 +410,7 @@ struct perf_sample_data;
 
 typedef void (*perf_overflow_handler_t)(struct perf_event *,
 					struct perf_sample_data *,
-					struct pt_regs *regs);
+					struct pt_regs *regs);// 为函数定义一个别名 perf_overflow_handler_t就是函数指针
 
 enum perf_group_flag {
 	PERF_GROUP_SOFTWARE		= 0x1,

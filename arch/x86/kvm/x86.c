@@ -6392,7 +6392,7 @@ void kvm_arch_mmu_notifier_invalidate_page(struct kvm *kvm,
  * exiting to the userspace.  Otherwise, the value will be returned to the
  * userspace.
  */
-static int vcpu_enter_guest(struct kvm_vcpu *vcpu)
+static int vcpu_enter_guest(struct kvm_vcpu *vcpu)// 
 {
 	int r;
 	bool req_int_win =
@@ -6446,9 +6446,17 @@ static int vcpu_enter_guest(struct kvm_vcpu *vcpu)
 		if (kvm_check_request(KVM_REQ_NMI, vcpu))
 			process_nmi(vcpu);
 		if (kvm_check_request(KVM_REQ_PMU, vcpu))
+    {
+      printk(KERN_NOTICE "KVM_REQ_PMU start");
 			kvm_pmu_handle_event(vcpu);
+      printk(KERN_NOTICE "KVM_REQ_PMU end");
+    }
 		if (kvm_check_request(KVM_REQ_PMI, vcpu))
+    {
+      printk(KERN_NOTICE "KVM_REQ_PMI start");
 			kvm_pmu_deliver_pmi(vcpu);
+      printk(KERN_NOTICE "KVM_REQ_PMI end");
+    }
 		if (kvm_check_request(KVM_REQ_IOAPIC_EOI_EXIT, vcpu)) {
 			BUG_ON(vcpu->arch.pending_ioapic_eoi > 255);
 			if (test_bit(vcpu->arch.pending_ioapic_eoi,
