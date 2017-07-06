@@ -1252,7 +1252,7 @@ int cmd_stat(int argc, const char **argv, const char *prefix __maybe_unused)
 
 	setlocale(LC_ALL, "");
 
-	evsel_list = perf_evlist__new();
+	evsel_list = perf_evlist__new();// 初始化 perf_evlist 结构体
 	if (evsel_list == NULL)
 		return -ENOMEM;
 

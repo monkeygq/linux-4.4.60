@@ -10,6 +10,9 @@ void exit (void)
 }
 
 void *zalloc(unsigned size)
+  /*
+   * 分配(size + 7) - (size + 7) % 8 大小的内存
+   */
 {
         void *p = avail_ram;
 
