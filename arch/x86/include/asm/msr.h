@@ -85,6 +85,10 @@ static inline void native_write_msr(unsigned int msr,
 				    unsigned low, unsigned high)
 {
 	asm volatile("wrmsr" : : "c" (msr), "a"(low), "d" (high) : "memory");
+  /*
+   * 对于WRMSR指令 把要写入MSR的信息先存入(EDX:EAX)中
+   * 执行写指令后 信息存入ECX指定的MSR中
+   */
 }
 
 /* Can be uninlined because referenced by paravirt */
