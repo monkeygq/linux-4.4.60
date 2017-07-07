@@ -28,17 +28,23 @@ const char *perf_extract_argv0_path(const char *argv0)
 
 	if (!argv0 || !*argv0)
 		return NULL;
-	slash = argv0 + strlen(argv0);
+	slash = argv0 + strlen(argv0);// slash 指向argv0的\0位置
 
-	while (argv0 <= slash && !is_dir_sep(*slash))
+	while (argv0 <= slash && !is_dir_sep(*slash))// argv0 <=slash 并且 *slash不为/
 		slash--;
 
-	if (slash >= argv0) {
-		argv0_path = strndup(argv0, slash - argv0);
-		return argv0_path ? slash + 1 : NULL;
+	if (slash >= argv0) {// 在argv0指向的字符串中找到了/
+		argv0_path = strndup(argv0, slash - argv0);// 复制/前边的字符串到全局变量argv0_path中
+		return argv0_path ? slash + 1 : NULL;// 返回/后边的字符串部分
 	}
 
-	return argv0;
+	return argv0;// argv0中不包含/ 则返回本身
+    /*  
+     * 例如输入命令 /home/hougq/perf stat ./test
+     * cmd变为perf stat ./test
+     * 路径/home/hougq存入全局变量argv0_path中
+     */
+
 }
 
 void perf_set_argv_exec_path(const char *exec_path)

@@ -535,10 +535,15 @@ int main(int argc, const char **argv)
 	char sbuf[STRERR_BUFSIZE];
 
 	/* The page_size is placed in util object. */
-	page_size = sysconf(_SC_PAGE_SIZE);
+	page_size = sysconf(_SC_PAGE_SIZE);// sysconf 系统调用 获取配置信息
 	cacheline_size = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
 
 	cmd = perf_extract_argv0_path(argv[0]);
+  /*
+   * 例如输入命令 /home/hougq/perf stat ./test
+   * cmd变为perf stat ./test
+   * 路径/home/hougq存入全局变量argv0_path中
+   */
 	if (!cmd)
 		cmd = "perf-help";
 
