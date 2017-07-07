@@ -1021,7 +1021,7 @@ const char record_callchain_help[] = CALLCHAIN_RECORD_HELP
  * perf_evlist__prepare_workload, etc instead of fork+exec'in 'perf record',
  * using pipes, etc.
  */
-struct option __record_options[] = {
+struct option __record_options[] = {// 初始化option结构体数组 __record_options
 	OPT_CALLBACK('e', "event", &record.evlist, "event",
 		     "event selector. use 'perf list' to list available events",
 		     parse_events_option),
@@ -1130,7 +1130,7 @@ int cmd_record(int argc, const char **argv, const char *prefix __maybe_unused)
 	struct record *rec = &record;
 	char errbuf[BUFSIZ];
 
-	rec->evlist = perf_evlist__new();
+	rec->evlist = perf_evlist__new();//初始化
 	if (rec->evlist == NULL)
 		return -ENOMEM;
 
