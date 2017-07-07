@@ -147,11 +147,16 @@ struct option options[] = {
 
 static int handle_options(const char ***argv, int *argc, int *envchanged)
 {
+  /*
+   * 处理参数的函数
+   * 接受命令行中去掉perf的剩余参数
+   * 例如命令为perf stat ./test 则参数*argv是 stat ./test
+   */
 	int handled = 0;
 
 	while (*argc > 0) {
-		const char *cmd = (*argv)[0];
-		if (cmd[0] != '-')
+		const char *cmd = (*argv)[0];// cmd为perf后的第一个参数 例如stat
+		if (cmd[0] != '-')// 不为- 则退出循环
 			break;
 
 		/*
@@ -167,22 +172,25 @@ static int handle_options(const char ***argv, int *argc, int *envchanged)
 		 * and version command.
 		 */
 		if (!strcmp(cmd, "-h")) {
-			(*argv)[0] = "--help";
+			(*argv)[0] = "--help";// 如果是-h则修改为--help 例如把perf -h命令修改为perf --help
 			break;
 		}
 
 		if (!strcmp(cmd, "-v")) {
-			(*argv)[0] = "--version";
+			(*argv)[0] = "--version";// 如果是-v则修改为--version 例如把perf -v命令修改为perf --version
 			break;
 		}
 
 		/*
 		 * Check remaining flags.
 		 */
-		if (!prefixcmp(cmd, CMD_EXEC_PATH)) {
-			cmd += strlen(CMD_EXEC_PATH);
-			if (*cmd == '=')
+		if (!prefixcmp(cmd, CMD_EXEC_PATH)) {// 如果cmd(perf后的第一个参数)包含--exec-path 则执行
+			cmd += strlen(CMD_EXEC_PATH);// cmd向后移 即忽略掉--exec-path
+			if (*cmd == '=')// 如果忽略掉之后的第一个字符为=
 				perf_set_argv_exec_path(cmd + 1);
+      /* 将--exec-path=后面的部分 传递给函数 函数将参数赋值给全局变量 argv_exec_path 
+       * 并设置环境变量PERF_EXEC_PATH为 --exec-path=后面的部分 
+       */
 			else {
 				puts(perf_exec_path());
 				exit(0);
@@ -548,7 +556,7 @@ int main(int argc, const char **argv)
 		cmd = "perf-help";
 
 	/* get debugfs/tracefs mount point from /proc/mounts */
-	tracing_path_mount();
+	tracing_path_mount();// 获取挂载点 然后分别存入到3个字符数组中
 
 	/*
 	 * "perf-xxxx" is the same as "perf xxxx", but we obviously:
@@ -560,14 +568,14 @@ int main(int argc, const char **argv)
 	 * So we just directly call the internal command handler, and
 	 * die if that one cannot handle it.
 	 */
-	if (!prefixcmp(cmd, "perf-")) {
+	if (!prefixcmp(cmd, "perf-")) {// 如果cmd中包含前缀"perf-"
 		cmd += 5;
-		argv[0] = cmd;
+		argv[0] = cmd;// cmd去掉前缀"perf-"
 		handle_internal_command(argc, argv);
 		fprintf(stderr, "cannot handle %s internally", cmd);
 		goto out;
 	}
-	if (!prefixcmp(cmd, "trace")) {
+	if (!prefixcmp(cmd, "trace")) {// 如果cmd中包含前缀"trace"
 #ifdef HAVE_LIBAUDIT_SUPPORT
 		set_buildid_dir(NULL);
 		setup_path();
@@ -580,8 +588,8 @@ int main(int argc, const char **argv)
 #endif
 	}
 	/* Look for flags.. */
-	argv++;
-	argc--;
+	argv++;// 向后移动一个参数 例如perf stat ./stat argv指向stat
+	argc--;// 参数数量-1
 	handle_options(&argv, &argc, NULL);
 	commit_pager_choice();
 	set_buildid_dir(NULL);

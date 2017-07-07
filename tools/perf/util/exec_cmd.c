@@ -49,11 +49,17 @@ const char *perf_extract_argv0_path(const char *argv0)
 
 void perf_set_argv_exec_path(const char *exec_path)
 {
-	argv_exec_path = exec_path;
+	argv_exec_path = exec_path;// 设置全局变量
 	/*
 	 * Propagate this setting to external programs.
 	 */
 	setenv(EXEC_PATH_ENVIRONMENT, exec_path, 1);
+  /*
+   * 设置环境变量PERF_EXEC_PATH为exec_path
+   * setenv的第三个参数overwrite 
+   *   如果不为0 则覆盖掉要设置的环境变量
+   *   如果为0 如果原来环境变量被设置过 则忽略这次setenv的设置 
+   */
 }
 
 

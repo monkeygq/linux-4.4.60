@@ -5,9 +5,9 @@ int prefixcmp(const char *str, const char *prefix)
 {
 	for (; ; str++, prefix++)
 		if (!*prefix)
-			return 0;
+			return 0;// 如果str包含前缀prefix 则返回0值
 		else if (*str != *prefix)
-			return (unsigned char)*prefix - (unsigned char)*str;
+			return (unsigned char)*prefix - (unsigned char)*str;//如果str不包含前缀prefix 则返回非0值
 }
 
 /*
