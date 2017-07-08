@@ -117,7 +117,7 @@ static int check_browser_config(const char *cmd)
 static void commit_pager_choice(void)
 {
 	switch (use_pager) {
-	case 0:
+	case 0:// 命令行中有--no-pager的时候设置环境变量
 		setenv("PERF_PAGER", "cat", 1);
 		break;
 	case 1:
@@ -184,7 +184,7 @@ static int handle_options(const char ***argv, int *argc, int *envchanged)
 		/*
 		 * Check remaining flags.
 		 */
-		if (!prefixcmp(cmd, CMD_EXEC_PATH)) {// 如果cmd(perf后的第一个参数)包含--exec-path 则执行
+		if (!prefixcmp(cmd, CMD_EXEC_PATH)) {// 如果cmd包含--exec-path 则执行
 			cmd += strlen(CMD_EXEC_PATH);// cmd向后移 即忽略掉--exec-path
 			if (*cmd == '=')// 如果忽略掉之后的第一个字符为=
 				perf_set_argv_exec_path(cmd + 1);
@@ -192,10 +192,10 @@ static int handle_options(const char ***argv, int *argc, int *envchanged)
        * 并设置环境变量PERF_EXEC_PATH为 --exec-path=后面的部分 
        */
 			else {
-				puts(perf_exec_path());
-				exit(0);
+				puts(perf_exec_path());// 处理perf --exec-path命令 返回执行路径
+				exit(0);// 进程结束 正常退出进程
 			}
-		} else if (!strcmp(cmd, "--html-path")) {
+		} else if (!strcmp(cmd, "--html-path")) {// 处理perf --html-path命令
 			puts(system_path(PERF_HTML_PATH));
 			exit(0);
 		} else if (!strcmp(cmd, "-p") || !strcmp(cmd, "--paginate")) {
@@ -207,19 +207,19 @@ static int handle_options(const char ***argv, int *argc, int *envchanged)
 		} else if (!strcmp(cmd, "--perf-dir")) {
 			if (*argc < 2) {
 				fprintf(stderr, "No directory given for --perf-dir.\n");
-				usage(perf_usage_string);
+				usage(perf_usage_string);// 打印并exit
 			}
-			setenv(PERF_DIR_ENVIRONMENT, (*argv)[1], 1);
+			setenv(PERF_DIR_ENVIRONMENT, (*argv)[1], 1);// 把--perf-dir后面的参数进行环境变量赋值
 			if (envchanged)
 				*envchanged = 1;
-			(*argv)++;
-			(*argc)--;
+			(*argv)++;// 参数向后移动一个
+			(*argc)--;// 参数减一
 			handled++;
-		} else if (!prefixcmp(cmd, CMD_PERF_DIR)) {
-			setenv(PERF_DIR_ENVIRONMENT, cmd + strlen(CMD_PERF_DIR), 1);
+		} else if (!prefixcmp(cmd, CMD_PERF_DIR)) {// 如果cmd包含 --perf-dir
+			setenv(PERF_DIR_ENVIRONMENT, cmd + strlen(CMD_PERF_DIR), 1);//设置环境变量
 			if (envchanged)
 				*envchanged = 1;
-		} else if (!strcmp(cmd, "--work-tree")) {
+		} else if (!strcmp(cmd, "--work-tree")) {// 如果cmd为 --work-tree
 			if (*argc < 2) {
 				fprintf(stderr, "No directory given for --work-tree.\n");
 				usage(perf_usage_string);
@@ -229,6 +229,9 @@ static int handle_options(const char ***argv, int *argc, int *envchanged)
 				*envchanged = 1;
 			(*argv)++;
 			(*argc)--;
+      /*
+       * 后面几个判断基本相同 处理一种带=的情况 和 一种不带等好的情况
+       */
 		} else if (!prefixcmp(cmd, CMD_WORK_TREE)) {
 			setenv(PERF_WORK_TREE_ENVIRONMENT, cmd + strlen(CMD_WORK_TREE), 1);
 			if (envchanged)
@@ -258,16 +261,16 @@ static int handle_options(const char ***argv, int *argc, int *envchanged)
 			fprintf(stderr, "dir: %s\n", tracing_path);
 			if (envchanged)
 				*envchanged = 1;
-		} else if (!strcmp(cmd, "--list-cmds")) {
+		} else if (!strcmp(cmd, "--list-cmds")) {// 处理命令perf --list-cmds
 			unsigned int i;
 
-			for (i = 0; i < ARRAY_SIZE(commands); i++) {
+			for (i = 0; i < ARRAY_SIZE(commands); i++) {// 打印commands结构体数组
 				struct cmd_struct *p = commands+i;
 				printf("%s ", p->cmd);
 			}
 			putchar('\n');
 			exit(0);
-		} else if (!strcmp(cmd, "--list-opts")) {
+		} else if (!strcmp(cmd, "--list-opts")) {// 处理命令
 			unsigned int i;
 
 			for (i = 0; i < ARRAY_SIZE(options)-1; i++) {
@@ -389,7 +392,7 @@ static int run_builtin(struct cmd_struct *p, int argc, const char **argv)
 		use_pager = check_pager_config(p->cmd);
 	if (use_pager == -1 && p->option & USE_PAGER)
 		use_pager = 1;
-	commit_pager_choice();
+	commit_pager_choice();// 根据pager选项设置环境变量 具体见函数内部的注释
 
 	status = p->fn(argc, argv, prefix);
 	exit_browser(status);
@@ -431,9 +434,9 @@ static void handle_internal_command(int argc, const char **argv)
 {
 	const char *cmd = argv[0];
 	unsigned int i;
-	static const char ext[] = STRIP_EXTENSION;
+	static const char ext[] = STRIP_EXTENSION; // 常量的初始化值为"" ext表示后缀
 
-	if (sizeof(ext) > 1) {
+	if (sizeof(ext) > 1) {// 如果有后缀 则去掉argv[0]的后缀ext
 		i = strlen(argv[0]) - strlen(ext);
 		if (i > 0 && !strcmp(argv[0] + i, ext)) {
 			char *argv0 = strdup(argv[0]);
@@ -590,23 +593,23 @@ int main(int argc, const char **argv)
 	/* Look for flags.. */
 	argv++;// 向后移动一个参数 例如perf stat ./stat argv指向stat
 	argc--;// 参数数量-1
-	handle_options(&argv, &argc, NULL);
-	commit_pager_choice();
+	handle_options(&argv, &argc, NULL);// 处理命令行参数 有一些可以直接结束perf进程
+	commit_pager_choice();// 在handle_options函数中处理过page相关的全局变量use_pager 设置为0或1 未设置则默认值为-1
 	set_buildid_dir(NULL);
 
 	if (argc > 0) {
-		if (!prefixcmp(argv[0], "--"))
+		if (!prefixcmp(argv[0], "--"))// argv[0] 去掉前缀--
 			argv[0] += 2;
-	} else {
+	} else {// 相当于只执行perf命令 没有任何参数
 		/* The user didn't specify a command; give them help */
 		printf("\n usage: %s\n\n", perf_usage_string);
 		list_common_cmds_help();
 		printf("\n %s\n\n", perf_more_info_string);
 		goto out;
 	}
-	cmd = argv[0];
+	cmd = argv[0];// cmd 变为argv[0]去掉前缀--(如果有前缀--的话)
 
-	test_attr__init();
+	test_attr__init();// 获取常量PERF_TEST_ATTR 如果有常量则 test_attr__enabled 为true
 
 	/*
 	 * We use PATH to find perf commands, but we prepend some higher
