@@ -394,7 +394,7 @@ static int run_builtin(struct cmd_struct *p, int argc, const char **argv)
 		use_pager = 1;
 	commit_pager_choice();// 根据pager选项设置环境变量 具体见函数内部的注释
 
-	status = p->fn(argc, argv, prefix);
+	status = p->fn(argc, argv, prefix);// 最关键的一个函数 通过函数指针调用相应的cmd_xxx函数
 	exit_browser(status);
 	perf_env__exit(&perf_env);
 	bpf__clear();
@@ -430,7 +430,7 @@ out:
 	return status;
 }
 
-static void handle_internal_command(int argc, const char **argv)
+static void handle_internal_command(int argc, const char **argv)// 最关键的函数run_builtin
 {
 	const char *cmd = argv[0];
 	unsigned int i;
@@ -455,7 +455,7 @@ static void handle_internal_command(int argc, const char **argv)
 		struct cmd_struct *p = commands+i;
 		if (strcmp(p->cmd, cmd))
 			continue;
-		exit(run_builtin(p, argc, argv));
+		exit(run_builtin(p, argc, argv));// run_builtin调用builtin-xxx.c中的cmd_xxx函数
 	}
 }
 
@@ -591,7 +591,7 @@ int main(int argc, const char **argv)
 #endif
 	}
 	/* Look for flags.. */
-	argv++;// 向后移动一个参数 例如perf stat ./stat argv指向stat
+	argv++;// 向后移动一个参数 例如perf stat ./test argv指向stat
 	argc--;// 参数数量-1
 	handle_options(&argv, &argc, NULL);// 处理命令行参数 有一些可以直接结束perf进程
 	commit_pager_choice();// 在handle_options函数中处理过page相关的全局变量use_pager 设置为0或1 未设置则默认值为-1
