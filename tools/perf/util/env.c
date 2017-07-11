@@ -35,7 +35,7 @@ int perf_env__set_cmdline(struct perf_env *env, int argc, const char *argv[])
 		return 0;
 
 	/* do not include NULL termination */
-	env->cmdline_argv = calloc(argc, sizeof(char *));
+	env->cmdline_argv = calloc(argc, sizeof(char *));// calloc分配argc个sizeof(char *)大小的空间 返回一个指向该空间的指针
 	if (env->cmdline_argv == NULL)
 		goto out_enomem;
 
@@ -44,12 +44,12 @@ int perf_env__set_cmdline(struct perf_env *env, int argc, const char *argv[])
 	 * parsing:
 	 */
 	for (i = 0; i < argc ; i++) {
-		env->cmdline_argv[i] = argv[i];
+		env->cmdline_argv[i] = argv[i];// 把argv放入env的结构体中
 		if (env->cmdline_argv[i] == NULL)
 			goto out_free;
 	}
 
-	env->nr_cmdline = argc;
+	env->nr_cmdline = argc;// 把argv的数量argc放入env结构体中
 
 	return 0;
 out_free:

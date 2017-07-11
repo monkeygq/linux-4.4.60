@@ -38,9 +38,9 @@ void perf_evlist__init(struct perf_evlist *evlist, struct cpu_map *cpus,
 {
 	int i;
 
-	for (i = 0; i < PERF_EVLIST__HLIST_SIZE; ++i)
-		INIT_HLIST_HEAD(&evlist->heads[i]);
-	INIT_LIST_HEAD(&evlist->entries);
+	for (i = 0; i < PERF_EVLIST__HLIST_SIZE; ++i)// 常量为 1 << 8 即256 初始化哈希链表
+		INIT_HLIST_HEAD(&evlist->heads[i]);// 把perf_evlist结构体中的hlist_head数组heads都赋值NULL
+	INIT_LIST_HEAD(&evlist->entries);// 初始化双向链表
 	perf_evlist__set_maps(evlist, cpus, threads);
 	fdarray__init(&evlist->pollfd, 64);
 	evlist->workload.pid = -1;
@@ -1210,8 +1210,8 @@ void perf_evlist__set_maps(struct perf_evlist *evlist, struct cpu_map *cpus,
 	 * the caller to increase the reference count.
 	 */
 	if (cpus != evlist->cpus) {
-		cpu_map__put(evlist->cpus);
-		evlist->cpus = cpu_map__get(cpus);
+		cpu_map__put(evlist->cpus);// 记数减1为0 则置NULL
+		evlist->cpus = cpu_map__get(cpus);// cpus记数加1后赋值给evlist->cpus
 	}
 
 	if (threads != evlist->threads) {

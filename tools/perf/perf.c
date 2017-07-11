@@ -376,6 +376,10 @@ const char perf_version_string[] = PERF_VERSION;
 
 static int run_builtin(struct cmd_struct *p, int argc, const char **argv)
 {
+  /*
+   * 比如执行 perf record -e cycles ./test
+   * argv 是 record -e cycles ./test
+   */
 	int status;
 	struct stat st;
 	const char *prefix;
@@ -537,9 +541,7 @@ void pthread__unblock_sigwinch(void)
 int main(int argc, const char **argv)
   /*
    * 处理执行perf相关命令的入口函数
-   * 如果想修改perf只需要 先在源代码中修改 然后makefile编译
-   * 把编译好的perf文件拷贝到/usr/bin目录下即可
-   * 因为/usr/bin在环境变量PATH中
+   * 如果想修改perf只需要 先在源代码中修改 然后make && make install
    */
 {
 	const char *cmd;

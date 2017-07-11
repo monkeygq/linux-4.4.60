@@ -238,7 +238,7 @@ struct cpu_map *cpu_map__get(struct cpu_map *map)
 
 void cpu_map__put(struct cpu_map *map)
 {
-	if (map && atomic_dec_and_test(&map->refcnt))
+	if (map && atomic_dec_and_test(&map->refcnt))// 如果map不为NULL 并且 map->refcnt.counter减1后等于0 则 free(map)
 		cpu_map__delete(map);
 }
 

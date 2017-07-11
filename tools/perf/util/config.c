@@ -458,7 +458,7 @@ static int perf_config_global(void)
 	return !perf_env_bool("PERF_CONFIG_NOGLOBAL", 0);
 }
 
-int perf_config(config_fn_t fn, void *data)
+int perf_config(config_fn_t fn, void *data)// fn是函数指针
 {
 	int ret = 0, found = 0;
 	const char *home = NULL;

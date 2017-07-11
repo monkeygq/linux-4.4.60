@@ -367,6 +367,12 @@ void parse_options_start(struct parse_opt_ctx_t *ctx,
 	ctx->argc = argc - 1;
 	ctx->argv = argv + 1;
 	ctx->out  = argv;
+  /*
+   * 例如输入命令 perf record -e cycles ./test
+   * ctx->argc = 3
+   * ctx->argv = -e cycles ./test
+   * ctx->out = record -e cycle ./test
+   */
 	ctx->cpidx = ((flags & PARSE_OPT_KEEP_ARGV0) != 0);
 	ctx->flags = flags;
 	if ((flags & PARSE_OPT_KEEP_UNKNOWN) &&
@@ -390,17 +396,17 @@ int parse_options_step(struct parse_opt_ctx_t *ctx,
 	ctx->opt = NULL;
 
 	for (; ctx->argc; ctx->argc--, ctx->argv++) {
-		arg = ctx->argv[0];
-		if (*arg != '-' || !arg[1]) {
+		arg = ctx->argv[0];// 遍历ctx->argv 字符串数组中的每一个字符串 赋值给arg
+		if (*arg != '-' || !arg[1]) {// 参数不为- 或者 参数只是一个字符
 			if (ctx->flags & PARSE_OPT_STOP_AT_NON_OPTION)
 				break;
 			ctx->out[ctx->cpidx++] = ctx->argv[0];
 			continue;
 		}
 
-		if (arg[1] != '-') {
+		if (arg[1] != '-') {// 参数的第二个字符不是-
 			ctx->opt = ++arg;
-			if (internal_help && *ctx->opt == 'h') {
+			if (internal_help && *ctx->opt == 'h') {// 感觉是在处理 perf -h
 				return usage_with_options_internal(usagestr, options, 0, ctx);
 			}
 			switch (parse_short_opt(ctx, options)) {
@@ -501,7 +507,7 @@ int parse_options_subcommand(int argc, const char **argv, const struct option *o
 {
 	struct parse_opt_ctx_t ctx;
 
-	perf_env__set_cmdline(&perf_env, argc, argv);
+	perf_env__set_cmdline(&perf_env, argc, argv);// 把 argc argv 存入 perf_env 结构体中
 
 	/* build usage string if it's not provided */
 	if (subcommands && !usagestr[0]) {
@@ -519,7 +525,14 @@ int parse_options_subcommand(int argc, const char **argv, const struct option *o
 		strbuf_release(&buf);
 	}
 
-	parse_options_start(&ctx, argc, argv, flags);
+	parse_options_start(&ctx, argc, argv, flags);// 给parse_opt_ctx_t结构体数组ctx 用 argc argv flags赋值
+  /*
+   * 例如输入命令 perf record -e cycles ./test
+   * parse_options_start 执行后
+   * ctx->argc = 3
+   * ctx->argv = -e cycles ./test
+   * ctx->out = record -e cycle ./test
+   */
 	switch (parse_options_step(&ctx, options, usagestr)) {
 	case PARSE_OPT_HELP:
 		exit(129);

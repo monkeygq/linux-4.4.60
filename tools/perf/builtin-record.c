@@ -474,6 +474,7 @@ static void snapshot_sig_handler(int sig);
 
 static int __cmd_record(struct record *rec, int argc, const char **argv)
 {
+
 	int err;
 	int status = 0;
 	unsigned long waking = 0;
@@ -1126,8 +1127,12 @@ struct option *record_options = __record_options;
 
 int cmd_record(int argc, const char **argv, const char *prefix __maybe_unused)
 {
+  /*  
+   * 比如执行 perf record -e cycles ./test
+   * argv 是 record -e cycles ./test
+   */
 	int err;
-	struct record *rec = &record;
+	struct record *rec = &record;// static struct record record 
 	char errbuf[BUFSIZ];
 
 	rec->evlist = perf_evlist__new();//初始化
@@ -1220,7 +1225,7 @@ int cmd_record(int argc, const char **argv, const char *prefix __maybe_unused)
 		goto out_symbol_exit;
 	}
 
-	err = __cmd_record(&record, argc, argv);
+	err = __cmd_record(&record, argc, argv);// 承接例子 这个时候argv变为 ./t1
 out_symbol_exit:
 	perf_evlist__delete(rec->evlist);
 	symbol__exit();
