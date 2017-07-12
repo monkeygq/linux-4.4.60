@@ -1120,7 +1120,7 @@ struct option __record_options[] = {// 初始化option结构体数组 __record_o
 	OPT_STRING(0, "clang-opt", &llvm_param.clang_opt, "clang options",
 		   "options passed to clang when compiling BPF scriptlets"),
 #endif
-	OPT_END()
+	OPT_END()// options结构体数组的初始化以 .type = OPTION_END结尾
 };
 
 struct option *record_options = __record_options;
@@ -1142,7 +1142,7 @@ int cmd_record(int argc, const char **argv, const char *prefix __maybe_unused)
 	perf_config(perf_record_config, rec);
 
 	argc = parse_options(argc, argv, record_options, record_usage,
-			    PARSE_OPT_STOP_AT_NON_OPTION);
+			    PARSE_OPT_STOP_AT_NON_OPTION);// 按照上面的例子 argc 等于 1
 	if (!argc && target__none(&rec->opts.target))
 		usage_with_options(record_usage, record_options);
 
@@ -1225,7 +1225,7 @@ int cmd_record(int argc, const char **argv, const char *prefix __maybe_unused)
 		goto out_symbol_exit;
 	}
 
-	err = __cmd_record(&record, argc, argv);// 承接例子 这个时候argv变为 ./t1
+	err = __cmd_record(&record, argc, argv);// 承接例子 这个时候argv变为 ./test
 out_symbol_exit:
 	perf_evlist__delete(rec->evlist);
 	symbol__exit();

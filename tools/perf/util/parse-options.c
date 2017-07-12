@@ -227,9 +227,9 @@ static int get_value(struct parse_opt_ctx_t *p,
 
 static int parse_short_opt(struct parse_opt_ctx_t *p, const struct option *options)
 {
-	for (; options->type != OPTION_END; options++) {
-		if (options->short_name == *p->opt) {
-			p->opt = p->opt[1] ? p->opt + 1 : NULL;
+	for (; options->type != OPTION_END; options++) {// 遍历builtin-record.c中定义的option结构体数组 数组中的最后一个元素的type值为OPTION_END
+		if (options->short_name == *p->opt) {//如果option结构体数组中找到匹配的
+			p->opt = p->opt[1] ? p->opt + 1 : NULL;// 按照例子 p->opt等于 NULL
 			return get_value(p, options, OPT_SHORT);
 		}
 	}
@@ -371,7 +371,7 @@ void parse_options_start(struct parse_opt_ctx_t *ctx,
    * 例如输入命令 perf record -e cycles ./test
    * ctx->argc = 3
    * ctx->argv = -e cycles ./test
-   * ctx->out = record -e cycle ./test
+   * ctx->out = record -e cycles ./test
    */
 	ctx->cpidx = ((flags & PARSE_OPT_KEEP_ARGV0) != 0);
 	ctx->flags = flags;
@@ -388,7 +388,7 @@ int parse_options_step(struct parse_opt_ctx_t *ctx,
 		       const struct option *options,
 		       const char * const usagestr[])
 {
-	int internal_help = !(ctx->flags & PARSE_OPT_NO_INTERNAL_HELP);
+	int internal_help = !(ctx->flags & PARSE_OPT_NO_INTERNAL_HELP);// NO_INTERNAL_HELP 变量为1 否则为0
 	int excl_short_opt = 1;
 	const char *arg;
 
@@ -397,19 +397,19 @@ int parse_options_step(struct parse_opt_ctx_t *ctx,
 
 	for (; ctx->argc; ctx->argc--, ctx->argv++) {
 		arg = ctx->argv[0];// 遍历ctx->argv 字符串数组中的每一个字符串 赋值给arg
-		if (*arg != '-' || !arg[1]) {// 参数不为- 或者 参数只是一个字符
+		if (*arg != '-' || !arg[1]) {// arg的第一个字符不为- 或者 参数只是一个字符
 			if (ctx->flags & PARSE_OPT_STOP_AT_NON_OPTION)
 				break;
 			ctx->out[ctx->cpidx++] = ctx->argv[0];
 			continue;
 		}
 
-		if (arg[1] != '-') {// 参数的第二个字符不是-
-			ctx->opt = ++arg;
-			if (internal_help && *ctx->opt == 'h') {// 感觉是在处理 perf -h
+		if (arg[1] != '-') {// 参数的第二个字符不是- 参数现在的理解就是 -x 例如-e
+			ctx->opt = ++arg;// perf record -e cycles ./t1为例 这时 ctx->opt = e
+			if (internal_help && *ctx->opt == 'h') {// 处理 perf record -h
 				return usage_with_options_internal(usagestr, options, 0, ctx);
 			}
-			switch (parse_short_opt(ctx, options)) {
+			switch (parse_short_opt(ctx, options)) {// 进入解析short_name的阶段
 			case -1:
 				return parse_options_usage(usagestr, options, arg, 1);
 			case -2:
@@ -499,6 +499,12 @@ int parse_options_end(struct parse_opt_ctx_t *ctx)
 {
 	memmove(ctx->out + ctx->cpidx, ctx->argv, ctx->argc * sizeof(*ctx->out));
 	ctx->out[ctx->cpidx + ctx->argc] = NULL;
+  /* 此时
+   * ctx->argc = 1
+   * ctx->cpidx = 0
+   * ctx->argv = ./test
+   * ctx->out = ./test
+   */
 	return ctx->cpidx + ctx->argc;
 }
 
@@ -564,6 +570,12 @@ int parse_options_subcommand(int argc, const char **argv, const struct option *o
 		usage_with_options(usagestr, options);
 	}
 
+  /* 此时
+   * ctx->argc = 1
+   * ctx->cpidx = 0
+   * ctx->argv = ./test
+   * ctx->out = record
+   */
 	return parse_options_end(&ctx);
 }
 
