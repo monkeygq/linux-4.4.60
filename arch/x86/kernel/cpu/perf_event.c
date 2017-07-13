@@ -2109,7 +2109,7 @@ void perf_check_microcode(void)
 }
 EXPORT_SYMBOL_GPL(perf_check_microcode);
 
-static struct pmu pmu = {
+static struct pmu pmu = {// pmu函数指针结构体初始化
 	.pmu_enable		= x86_pmu_enable,
 	.pmu_disable		= x86_pmu_disable,
 

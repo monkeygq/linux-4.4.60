@@ -4962,7 +4962,7 @@ static int perf_fasync(int fd, struct file *filp, int on)
 	return 0;
 }
 
-static const struct file_operations perf_fops = {
+static const struct file_operations perf_fops = {// 函数指针结构体
 	.llseek			= no_llseek,
 	.release		= perf_release,
 	.read			= perf_read,

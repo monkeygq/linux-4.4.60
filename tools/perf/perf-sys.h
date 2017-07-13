@@ -102,7 +102,7 @@
 static inline int
 sys_perf_event_open(struct perf_event_attr *attr,
 		      pid_t pid, int cpu, int group_fd,
-		      unsigned long flags)
+		      unsigned long flags)// 定义sys_perf_event_open函数
 {
 	int fd;
 
